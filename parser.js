@@ -51,8 +51,11 @@ const parseGedcom = async (gedcomData) => {
         const rv = dataFact
           .filter(e => !`${e}`.match(/ DATE /))
           .filter(e => `${e}`.match(/^[234] /))
-          .map(e => `${e}`.substring(7).replace(/^\s+|\s+$/g, ""))
-          .filter(e => `${e}` !== "");
+          .map(e => {
+            const label = `${e}`.split(" ")[1],
+              value = `${e}`.substring(7).replace(/^\s+|\s+$/g, "");
+            return `${label}: ${value}`;
+          }).filter(e => `${e}` !== "");
 
         return rv;
       };
@@ -60,7 +63,7 @@ const parseGedcom = async (gedcomData) => {
       if (["CHIL", "OBJE", "BURI"].includes(label)) {
         const key = label.toLocaleLowerCase();
 
-        let me = { key, val };
+        let me = { id: val };
         const fact = listFact(dataFact);
         me["details"] = fact;
 
@@ -115,8 +118,6 @@ const parseGedcom = async (gedcomData) => {
             parseInt(bitsSlash[1]) - 1, parseInt(bitsSlash[0])));
         } catch (e) { console.warn(e) }
       }
-      // if ((!jsDate) && dString.match(/^\d\d\d\d$/))
-      //   try { jsDate = new Date(Date.UTC(parseInt(dString), 5, 1)) } catch (e) { console.warn(e) }
 
       const key = label.toLocaleLowerCase();
       if (!person[key]) person[key] = [];
@@ -125,49 +126,14 @@ const parseGedcom = async (gedcomData) => {
       person[key] = [
         ...existing,
         [origVal, likelyYear, jsDate,
-          ...facts
-          // spreadFacts(dataFacts)
-        ]
+          ...facts]
       ].sort((a, b) => (a[1] - b[1]) ||
         (parseInt(a[0]) - parseInt(b[0])) ||
         (a[0] - b[0]));
-      // .push([dString, jsDate,
-      //   ...dataFact
-      //     .filter(e => !`${e}`.match(/ DATE /))
-      //     .filter(e => `${e}`.match(/^[234] /))
-      //     .map(e => `${e}`.substring(7).replace(/^\s+|\s+$/g, ""))
-      //     .filter(e => `${e}` !== "")]);
-      // n        val ? `"${val}"`.replace(/(Age(?: in \d\d\d\d)?:\s+\d+)(?=[A-Za-z])/, "$1 ") : val])
-      //         .filter(f => f !=));
-
-      // person.data = dataFacts;
     }
     people.push(person);
   }
   return people;
 };
-// ,
-// marriagesData = JSON.parse(fs.readFileSync("bigMarriages1.json"), (key, value) => {
-//   // console.info(`Saw key ${key} and value ${value}`);
-//   if (["marriageDate"].includes(key) && value) {
-//     const dString = value,
-//       bits = dString.split(" ");
-
-//     value = [value]
-//     if (bits && bits.length === 3) {
-//       // console.info(bits);
-//       try {
-//         jsDate = new Date(Date.UTC(parseInt(bits[2]),
-//           ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-//             "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].findIndex(v => v === bits[1]),
-//           parseInt(bits[0])));
-//       } catch (e) { console.warn(e) }
-
-//       if (jsDate) value.push(jsDate);
-//     }
-//   }
-//   return (key, value);
-// });
-
 
 module.exports = { parseGedcom };
