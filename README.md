@@ -10,15 +10,47 @@ Usage
 -----
 
 ```
+const myGedcomFilename = `myData.ged`; // set as appropriate
+
 const { readFileSync } = require("fs"),
   { parseGedcom } = require("./gedcom-jones/parser"),
   main = async () => {
-    const people = await parseGedcom(readFileSync(`myData.ged`));
+    const people = await parseGedcom(readFileSync());
     for (const p of people) // also other records, families, sources etc
       console.info(p);
   };
 
 main();
+```
+
+The parser returns a promise. Usage in a non-asynchronous environment (currently) would be:
+
+```
+const myGedcomFilename = `myData.ged`; // set as appropriate
+
+const { readFileSync } = require("fs"),
+  { parseGedcom } = require("./gedcom-jones/parser"),
+  main = () => {
+    parseGedcom(readFileSync()).then(people => {
+      for (const p of people) // also other records, families, sources etc
+        console.info(p);
+      })
+  };
+
+main();
+```
+
+People, Families, Sources
+-------------------------
+
+The parser collects all "Level 0" records from the incoming Gedcom data and processes each one before returning the full list of parsed records. This means that along with records indicating people ("individual" records always begin with id "P") there are also records which detail family structures (beginning with id "F"; family records link parents to children) and details for the sources referenced by other records (beginning with an "S"). Most features, such as date parsing and detail collection, exist for non-individual records too.
+
+The parser does not set a 'type' for each record; the type of structure is self-evident in the id. As a result, the default list returned by the parser is a list of people, families and sources, if present in the Gedcom data. To see ONLY people for example filter the list for "@P" in the object's id field:
+
+```
+    const allData = await parseGedcom(readFileSync(`myData.ged`)),
+      peopleOnly = allData.filter(
+        data => !!`${data["id"]}`.substring(0,2) === "@P");
 ```
 
 Dates
@@ -46,19 +78,6 @@ Example:
       'Falls Church, Fairfax, Virginia, USA'
     ]
   ]
-```
-
-People, Families, Sources
--------------------------
-
-The parser collects all "Level 0" records from the incoming Gedcom data and processes each one before returning the full list of parsed records. This means that along with records indicating people ("individual" records always begin with id "P") there are also records which detail family structures (beginning with id "F") and details for the sources referenced by other records (beginning with an "S"). Most features, such as date parsing and detail collection, exist for non-individual records too. 
-
-As a result, the list returned by the parser is a list of people, families and sources, if present in the Gedcom data. To see ONLY the people, just filter for a P in the id field:
-
-```
-    const allData = await parseGedcom(readFileSync(`myData.ged`)),
-      peopleOnly = allData.filter(
-        data => !!`${data["id"]}`.substring(0,2) === "@P");
 ```
 
 Status
