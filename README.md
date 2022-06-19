@@ -13,7 +13,7 @@ Usage
 const myGedcomFilename = `myData.ged`; // set as appropriate
 
 const { readFileSync } = require("fs"),
-  { parseGedcom } = require("./gedcom-jones/parser"),
+  { parseGedcom } = require("./gedcom-hero/parser"),
   main = async () => {
     const people = await parseGedcom(readFileSync());
     for (const p of people) // also other records, families, sources etc
@@ -29,7 +29,7 @@ The parser returns a promise. Usage in a non-asynchronous environment (currently
 const myGedcomFilename = `myData.ged`; // set as appropriate
 
 const { readFileSync } = require("fs"),
-  { parseGedcom } = require("./gedcom-jones/parser"),
+  { parseGedcom } = require("./gedcom-hero/parser"),
   main = () => {
     parseGedcom(readFileSync()).then(people => {
       for (const p of people) // also other records, families, sources etc
